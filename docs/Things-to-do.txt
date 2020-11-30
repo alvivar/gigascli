@@ -1,0 +1,9 @@
+
+- Extract classes relationships
+- Generate the EntitySet
+- Generate the
+
+
+2020.11.29
+x  Read all .cs from a folder
+x Detect particular parameters to react
