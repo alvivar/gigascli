@@ -1,6 +1,7 @@
 
 - Generate the EntitySet
-- Generate the
+- Generate the base Component and System
+- Generate the !alt base Component and System
 
 
 2020.12.06
