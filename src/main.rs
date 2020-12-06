@@ -1,5 +1,5 @@
 use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
-use std::io::{BufRead, BufReader, Error, Write};
+use std::io::{BufRead, BufReader};
 use std::{collections::HashMap, fs::File};
 use std::{env, path::Path};
 use walkdir::{DirEntry, WalkDir};
@@ -57,57 +57,44 @@ fn main() {
     if let Some(_matches) = matches.subcommand_matches("analize") {
         let current_dir = env::current_dir().unwrap();
 
-        // Find all C# files
+        // All C# files
 
-        let mut csharp_files: Vec<DirEntry> = Vec::new();
-        for entry in WalkDir::new(current_dir) {
-            let entry = entry.unwrap();
-            let name = entry.file_name().to_string_lossy().to_lowercase();
-            if name.ends_with(".cs") {
-                csharp_files.push(entry);
-            }
-        }
+        let csharp_files = find_files(current_dir, ".cs");
 
         // Look and classify !gigas & !alt on files
 
         let mut gigas: Vec<DirEntry> = Vec::new();
         let mut gigas_alt: Vec<DirEntry> = Vec::new();
+
         for entry in &csharp_files {
-            let input = File::open(entry.path()).unwrap();
-            let buffered = BufReader::new(input);
-            for line in buffered.lines() {
-                let line = line.unwrap();
-                if line.to_lowercase().contains("!gigas") {
-                    if line.to_lowercase().contains("!alt") {
+            for line in lines_from_file(entry.path()) {
+                let lowercase_line = line.to_lowercase();
+
+                if lowercase_line.contains("!gigas") {
+                    if lowercase_line.contains("!alt") {
                         gigas_alt.push(entry.clone());
                     } else {
                         gigas.push(entry.clone());
                     }
+
                     break;
                 }
             }
         }
 
-        // Debug printing
-
-        // println!("\nGIGAS");
-        // for entry in &gigas {
-        //     println!("{}", entry.file_name().to_string_lossy());
-        // }
-
-        // println!("\nALT");
-        // for entry in &gigas_alt {
-        //     println!("{}", entry.path().file_stem().unwrap().to_string_lossy());
-        // }
-
         // Find relationships between classes
 
-        let gigas_classes: Vec<&str> = gigas
+        let mut gigas_all: Vec<DirEntry> = Vec::new();
+        gigas_all.extend(gigas);
+        gigas_all.extend(gigas_alt);
+
+        let gigas_classes: Vec<String> = gigas_all
             .iter()
-            .map(|x| x.path().file_stem().unwrap().to_str().unwrap())
+            .map(|x| x.path().file_stem().unwrap().to_string_lossy().to_string())
             .collect();
 
-        let mut relation: HashMap<String, Vec<String>> = HashMap::new();
+        let mut relation_fileclass: HashMap<String, Vec<String>> = HashMap::new();
+        let mut relation_classfile: HashMap<String, Vec<String>> = HashMap::new();
 
         for file in &csharp_files {
             for line in lines_from_file(file.path()) {
@@ -118,19 +105,32 @@ fn main() {
                         continue;
                     }
 
-                    let gigasnames: Vec<String> =
-                        vec![format!("{}s", class), format!("{}Ids", class)];
+                    let gigasnames: Vec<String> = vec![
+                        format!("Get{}", class),
+                        format!("{}s", class),
+                        format!("{}Ids", class),
+                    ];
 
                     for name in gigasnames {
                         if line.contains(&name) {
-                            // print!("\nFound {} in {} at \n{}\n", class, filename, line);
+                            // File to Class
 
-                            let classes = relation
+                            let classes = relation_fileclass
                                 .entry(filename.to_string())
                                 .or_insert_with(Vec::new);
 
                             if !classes.contains(&class.to_string()) {
                                 classes.push(class.to_string());
+                            }
+
+                            // Class to File
+
+                            let files = relation_classfile
+                                .entry(class.to_string())
+                                .or_insert_with(Vec::new);
+
+                            if !files.contains(&filename.to_string()) {
+                                files.push(filename.to_string());
                             }
                         }
                     }
@@ -138,7 +138,18 @@ fn main() {
             }
         }
 
-        for (key, value) in &relation {
+        // Print relationships
+
+        println!("\n\t\t\t# From System to Component");
+        for (key, value) in &relation_fileclass {
+            println!("\n{}", key);
+            for entry in value {
+                println!("\t{}", entry);
+            }
+        }
+
+        println!("\n\t\t\t# From Component to System");
+        for (key, value) in &relation_classfile {
             println!("\n{}", key);
             for entry in value {
                 println!("\t{}", entry);
@@ -147,11 +158,25 @@ fn main() {
     }
 }
 
+fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<DirEntry> {
+    let mut files: Vec<DirEntry> = Vec::new();
+    for entry in WalkDir::new(filepath) {
+        let entry = entry.expect("Couldn't walk the path.");
+        let name = entry.file_name().to_string_lossy().to_lowercase();
+        if name.ends_with(extension) {
+            files.push(entry);
+        }
+    }
+
+    files
+}
+
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
-    let file = File::open(filename).expect("No file name.");
+    let file = File::open(filename).expect("Couldn't open the file.");
     let buffer = BufReader::new(file);
+
     buffer
         .lines()
-        .map(|l| l.expect("Couldn't parse line."))
+        .map(|l| l.expect("Couldn't parse the line."))
         .collect()
 }
