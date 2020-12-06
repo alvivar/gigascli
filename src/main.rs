@@ -88,17 +88,17 @@ fn main() {
         gigas_all.extend(gigas);
         gigas_all.extend(gigas_alt);
 
-        let gigas_classes: Vec<String> = gigas_all
+        let gigas_components: Vec<String> = gigas_all
             .iter()
             .map(|x| x.path().file_stem().unwrap().to_string_lossy().to_string())
             .collect();
 
-        let mut relation_fileclass: HashMap<String, Vec<String>> = HashMap::new();
-        let mut relation_classfile: HashMap<String, Vec<String>> = HashMap::new();
+        let mut relation_system_component: HashMap<String, Vec<String>> = HashMap::new();
+        let mut relation_component_system: HashMap<String, Vec<String>> = HashMap::new();
 
         for file in &csharp_files {
             for line in lines_from_file(file.path()) {
-                for class in &gigas_classes {
+                for class in &gigas_components {
                     let filename = file.path().file_stem().unwrap().to_str().unwrap();
 
                     if filename == "Femto" || filename == "EntitySet" {
@@ -113,9 +113,9 @@ fn main() {
 
                     for name in gigasnames {
                         if line.contains(&name) {
-                            // File to Class
+                            // System to Component
 
-                            let classes = relation_fileclass
+                            let classes = relation_system_component
                                 .entry(filename.to_string())
                                 .or_insert_with(Vec::new);
 
@@ -123,9 +123,9 @@ fn main() {
                                 classes.push(class.to_string());
                             }
 
-                            // Class to File
+                            // Component to System
 
-                            let files = relation_classfile
+                            let files = relation_component_system
                                 .entry(class.to_string())
                                 .or_insert_with(Vec::new);
 
@@ -138,21 +138,25 @@ fn main() {
             }
         }
 
-        // Print relationships
+        // Relationships
 
-        println!("\n\t\t\t# From System to Component");
-        for (key, value) in &relation_fileclass {
-            println!("\n{}", key);
+        println!();
+        println!(" System to Component Relationship");
+        println!(" ------ -- --------- ------------");
+        for (key, value) in &relation_system_component {
+            println!("\n\t{}", key);
             for entry in value {
-                println!("\t{}", entry);
+                println!("\t\t{}", entry);
             }
         }
 
-        println!("\n\t\t\t# From Component to System");
-        for (key, value) in &relation_classfile {
-            println!("\n{}", key);
+        println!();
+        println!(" Component to System Relationship");
+        println!(" --------- -- ------ ------------");
+        for (key, value) in &relation_component_system {
+            println!("\n\t{}", key);
             for entry in value {
-                println!("\t{}", entry);
+                println!("\t\t{}", entry);
             }
         }
     }

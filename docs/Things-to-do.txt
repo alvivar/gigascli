@@ -1,7 +1,8 @@
 
-- Generate the EntitySet
+- Repo
 - Generate the base Component and System
 - Generate the !alt base Component and System
+- Generate the EntitySet
 
 
 2020.12.06
