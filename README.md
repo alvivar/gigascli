@@ -1,6 +1,6 @@
 # Gigas CLI
 
-Gigas CLI made in Rust.
+Command Line Interface for Gigas, made in Rust.
 
     gigas-cli 0.1
     Check out github.com/alvivar/Gigas for more info!
@@ -17,3 +17,8 @@ Gigas CLI made in Rust.
         generate    Creates (or updates) the EntitySet.cs.
         help        Prints this message or the help of the given subcommand(s)
         new         Creates a Gigas Component and his System.
+
+## Crates
+
+- Clap
+- Walkdir
