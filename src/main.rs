@@ -34,7 +34,7 @@ fn main() {
         )
         .get_matches();
 
-    // Templates
+    // Component and System templates
 
     if let Some(matches) = matches.subcommand_matches("new") {
         let component_name = matches.value_of("ComponentName").unwrap();
@@ -62,7 +62,7 @@ fn main() {
         println!("\nDone!");
     }
 
-    // Code Generation
+    // EntitySet Generation
 
     if let Some(_matches) = matches.subcommand_matches("generate") {
         println!("\nNot done yet. Soon.");
