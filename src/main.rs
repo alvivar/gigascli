@@ -1,11 +1,11 @@
 use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
-use std::io::{BufRead, BufReader};
+use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::{collections::HashMap, fs::File};
 use std::{env, path::Path};
 use walkdir::{DirEntry, WalkDir};
 
 fn main() {
-    // Command line options
+    // Command Line
 
     let matches = App::new("gigas-cli")
         .version("0.1")
@@ -37,22 +37,38 @@ fn main() {
     // Templates
 
     if let Some(matches) = matches.subcommand_matches("new") {
-        if matches.is_present("alt") {
-            println!("!Alt enabled");
-        } else {
-            println!("Simple component");
-        }
+        let component_name = matches.value_of("ComponentName").unwrap();
 
-        println!("File name: {}", matches.value_of("ComponentName").unwrap());
+        let system_file = format!("{}System.cs", component_name);
+        let component_file = format!("{}.cs", component_name);
+
+        let system = generate_system_string(component_name);
+        let component = match matches.is_present("alt") {
+            true => generate_alt_component_string(component_name),
+            false => generate_component_string(component_name),
+        };
+
+        let current_dir = env::current_dir().unwrap();
+        write_file(component.as_str(), current_dir.join(&component_file));
+        write_file(system.as_str(), current_dir.join(&system_file));
+
+        println!("\n[1]\n{}", component);
+        println!("\n[2]\n{}", system);
+
+        println!();
+        println!("[1] {} generated", component_file);
+        println!("[2] {} generated", system_file);
+
+        println!("\nDone!");
     }
 
     // Code Generation
 
     if let Some(_matches) = matches.subcommand_matches("generate") {
-        println!("Generating EntitySet.cs[...]");
+        println!("\nNot done yet. Soon.");
     }
 
-    // Code Analizis
+    // Code Analysis
 
     if let Some(_matches) = matches.subcommand_matches("analize") {
         let current_dir = env::current_dir().unwrap();
@@ -99,9 +115,9 @@ fn main() {
         for file in &csharp_files {
             for line in lines_from_file(file.path()) {
                 for class in &gigas_components {
-                    let filename = file.path().file_stem().unwrap().to_str().unwrap();
+                    let system = file.path().file_stem().unwrap().to_str().unwrap();
 
-                    if filename == "Femto" || filename == "EntitySet" {
+                    if system == "Femto" || system == "EntitySet" {
                         continue;
                     }
 
@@ -115,22 +131,22 @@ fn main() {
                         if line.contains(&name) {
                             // System to Component
 
-                            let classes = relation_system_component
-                                .entry(filename.to_string())
+                            let components = relation_system_component
+                                .entry(system.to_string())
                                 .or_insert_with(Vec::new);
 
-                            if !classes.contains(&class.to_string()) {
-                                classes.push(class.to_string());
+                            if !components.contains(&class.to_string()) {
+                                components.push(class.to_string());
                             }
 
                             // Component to System
 
-                            let files = relation_component_system
+                            let systems = relation_component_system
                                 .entry(class.to_string())
                                 .or_insert_with(Vec::new);
 
-                            if !files.contains(&filename.to_string()) {
-                                files.push(filename.to_string());
+                            if !systems.contains(&system.to_string()) {
+                                systems.push(system.to_string());
                             }
                         }
                     }
@@ -141,8 +157,9 @@ fn main() {
         // Relationships
 
         println!();
-        println!(" System to Component Relationship");
-        println!(" ------ -- --------- ------------");
+        println!("\t------ - --------- ------------");
+        println!("\tSystem / Component Relationship");
+        println!("\t------ - --------- ------------");
         for (key, value) in &relation_system_component {
             println!("\n\t{}", key);
             for entry in value {
@@ -151,14 +168,17 @@ fn main() {
         }
 
         println!();
-        println!(" Component to System Relationship");
-        println!(" --------- -- ------ ------------");
+        println!("\t--------- - ------ ------------");
+        println!("\tComponent / System Relationship");
+        println!("\t--------- - ------ ------------");
         for (key, value) in &relation_component_system {
             println!("\n\t{}", key);
             for entry in value {
                 println!("\t\t{}", entry);
             }
         }
+
+        println!("\nDone!");
     }
 }
 
@@ -183,4 +203,102 @@ fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
         .lines()
         .map(|l| l.expect("Couldn't parse the line."))
         .collect()
+}
+
+fn lowercase_first(s: &str) -> String {
+    let mut c = s.chars();
+    match c.next() {
+        None => String::new(),
+        Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
+    }
+}
+
+fn write_file(data: &str, filepath: impl AsRef<Path>) {
+    let f = File::create(filepath).expect("Unable to create file.");
+    let mut f = BufWriter::new(f);
+    f.write_all(data.as_bytes()).expect("Unable to write data.");
+}
+
+fn generate_component_string(name: &str) -> String {
+    let template = r#"
+
+using UnityEngine;
+
+// !Gigas
+public class @ComponentName : MonoBehaviour
+{
+    private void OnEnable()
+    {
+        EntitySet.Add@ComponentName(this);
+    }
+
+    private void OnDisable()
+    {
+        EntitySet.Remove@ComponentName(this);
+    }
+}
+
+"#;
+
+    template.replace("@ComponentName", name).trim().to_string()
+}
+
+fn generate_alt_component_string(name: &str) -> String {
+    let template = r#"
+
+using UnityEngine;
+
+// !Gigas !Alt
+public class @ComponentName : MonoBehaviour
+{
+    private void OnEnable()
+    {
+        EntitySet.Add@ComponentName(this);
+    }
+
+    private void OnDisable()
+    {
+        EntitySet.Remove@ComponentName(this);
+    }
+
+    private void Start()
+    {
+        EntitySet.AddAlt@ComponentName(this);
+    }
+
+    private void OnDestroy()
+    {
+        EntitySet.RemoveAlt@ComponentName(this);
+    }
+}
+
+"#;
+
+    template.replace("@ComponentName", name).trim().to_string()
+}
+
+fn generate_system_string(name: &str) -> String {
+    let template = r#"
+
+using UnityEngine;
+
+public class @ComponentSystem : MonoBehaviour
+{
+    void Update()
+    {
+        var @components = EntitySet.@Components;
+        for (int i = 0; i < @components.Length; i++)
+        {
+            var @component = @components.Elements[i];
+        }
+    }
+}
+
+"#;
+
+    template
+        .replace("@Component", name)
+        .replace("@component", lowercase_first(name).as_str())
+        .trim()
+        .to_string()
 }
