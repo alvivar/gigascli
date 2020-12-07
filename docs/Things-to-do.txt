@@ -1,11 +1,12 @@
 
-- Repo
-- Generate the base Component and System
-- Generate the !alt base Component and System
 - Generate the EntitySet
 
 
 2020.12.06
+x File generation of the Templates
+x Generate the !alt base Component and System
+x Generate the base Component and System
+x Repo
 x Extract classes relationships
 
 2020.11.29
