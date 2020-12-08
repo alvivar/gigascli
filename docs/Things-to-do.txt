@@ -1,4 +1,5 @@
 
+- Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
 - Generate the EntitySet
 
 
