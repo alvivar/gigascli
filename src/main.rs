@@ -124,8 +124,8 @@ fn main() {
                     let gigasnames: Vec<String> = vec![
                         format!("{}s", class),
                         format!("{}Ids", class),
-                        format!("Get{}", class),
-                        format!("GetAlt{}", class),
+                        format!("Get{}(", class),
+                        format!("GetAlt{}(", class),
                     ];
 
                     for name in gigasnames {
