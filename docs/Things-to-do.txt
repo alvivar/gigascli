@@ -1,4 +1,8 @@
 
+
+- Include the commented // component.enable = false on Start in the --alt generator as a hint
+- Option to avoid system generation or component generation
+
 - Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
 - Generate the EntitySet
 
