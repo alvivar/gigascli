@@ -43,7 +43,7 @@ fn main() {
             SubCommand::with_name("analize").about("Analizes .cs files looking for relationships"),
         )
         .subcommand(
-            SubCommand::with_name("update").about("Self updates to the latest release on Github."),
+            SubCommand::with_name("update").about("Self updates to the latest release on Github"),
         )
         .get_matches();
 
