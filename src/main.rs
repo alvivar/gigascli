@@ -13,59 +13,87 @@ fn main() {
         .setting(ArgRequiredElseHelp)
         .subcommand(
             SubCommand::with_name("new")
-                .about("Creates a Gigas Component and his System.")
+                .setting(ArgRequiredElseHelp)
+                .about("Creates a Gigas Component System")
+                .arg(
+                    Arg::with_name("Name")
+                        .help("File name to be used as Component System")
+                        .required(true)
+                        .index(1),
+                )
                 .arg(
                     Arg::with_name("alt")
                         .long("alt")
-                        .help("Includes the !Alt API."),
+                        .help("Includes the !Alt API"),
+                )
+                .arg(Arg::with_name("output").short("o").help("Create the files"))
+                .arg(
+                    Arg::with_name("nocomp")
+                        .long("nocomp")
+                        .help("Ignore the Component"),
                 )
                 .arg(
-                    Arg::with_name("ComponentName")
-                        .help("File name to be used as Component.")
-                        .required(true)
-                        .index(1),
+                    Arg::with_name("nosys")
+                        .long("nosys")
+                        .help("Ignore the System"),
                 ),
         )
         .subcommand(
-            SubCommand::with_name("generate").about("Creates (or updates) the EntitySet.cs."),
-        )
-        .subcommand(
-            SubCommand::with_name("analize").about("Analizes .cs files looking for relationships."),
+            SubCommand::with_name("analize").about("Analizes .cs files looking for relationships"),
         )
         .get_matches();
 
     // Component and System templates
 
     if let Some(matches) = matches.subcommand_matches("new") {
-        let component_name = matches.value_of("ComponentName").unwrap();
+        let component_name = matches.value_of("Name").unwrap();
+        let has_output = matches.is_present("output");
+        let has_nocomp = matches.is_present("nocomp");
+        let has_nosys = matches.is_present("nosys");
 
-        let system_file = format!("{}System.cs", component_name);
-        let component_file = format!("{}.cs", component_name);
+        // Templates
 
-        let system = generate_system_string(component_name);
         let component = match matches.is_present("alt") {
             true => generate_alt_component_string(component_name),
             false => generate_component_string(component_name),
         };
 
-        let current_dir = env::current_dir().unwrap();
-        write_file(component.as_str(), current_dir.join(&component_file));
-        write_file(system.as_str(), current_dir.join(&system_file));
+        let system = generate_system_string(component_name);
 
-        println!("\n[1]\n{}", component);
-        println!("\n[2]\n{}", system);
+        // Writing
 
-        println!();
-        println!("[1] {} generated", component_file);
-        println!("[2] {} generated", system_file);
+        let component_file = format!("{}.cs", component_name);
+        let system_file = format!("{}System.cs", component_name);
+
+        if has_output {
+            let current_dir = env::current_dir().unwrap();
+
+            if !has_nocomp {
+                write_file(component.as_str(), current_dir.join(&component_file));
+            }
+
+            if !has_nosys {
+                write_file(system.as_str(), current_dir.join(&system_file));
+            }
+        }
+
+        // Print
+
+        if !has_nocomp {
+            println!("\n[1] Component\n\n{}", component);
+        }
+
+        if !has_nosys {
+            println!("\n[2] System\n\n{}", system);
+        }
+
+        if has_output {
+            println!();
+            println!("[1] {} generated", component_file);
+            println!("[2] {} generated", system_file);
+        }
 
         println!("\nDone!");
-    }
-
-    // EntitySet Generation
-
-    if let Some(_matches) = matches.subcommand_matches("generate") {
-        println!("\nNot done yet. Soon.");
     }
 
     // Code Analysis
@@ -265,6 +293,7 @@ public class @ComponentName : MonoBehaviour
     private void Start()
     {
         EntitySet.AddAlt@ComponentName(this);
+        // gameObject.SetActive(false);
     }
 
     private void OnDestroy()
