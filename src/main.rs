@@ -1,4 +1,5 @@
 use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
+use self_update::cargo_crate_version;
 use std::io::{BufRead, BufReader, BufWriter, Write};
 use std::{collections::HashMap, fs::File};
 use std::{env, path::Path};
@@ -40,6 +41,9 @@ fn main() {
         )
         .subcommand(
             SubCommand::with_name("analize").about("Analizes .cs files looking for relationships"),
+        )
+        .subcommand(
+            SubCommand::with_name("update").about("Self updates to the latest release on Github."),
         )
         .get_matches();
 
@@ -209,6 +213,13 @@ fn main() {
 
         println!("\nDone!");
     }
+
+    // Self Update
+
+    if let Some(_matches) = matches.subcommand_matches("update") {
+        println!();
+        let _ = update();
+    }
 }
 
 fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<DirEntry> {
@@ -331,4 +342,19 @@ public class @ComponentSystem : MonoBehaviour
         .replace("@component", lowercase_first(name).as_str())
         .trim()
         .to_string()
+}
+
+fn update() -> Result<(), Box<dyn std::error::Error>> {
+    let status = self_update::backends::github::Update::configure()
+        .repo_owner("alvivar")
+        .repo_name("gigascli")
+        .bin_name("gigascli")
+        .show_download_progress(true)
+        .current_version(cargo_crate_version!())
+        .build()?
+        .update()?;
+
+    println!("Update status: v{}", status.version());
+
+    Ok(())
 }
