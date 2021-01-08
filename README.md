@@ -17,6 +17,7 @@ Rust.
         analize    Analizes .cs files looking for relationships
         help       Prints this message or the help of the given subcommand(s)
         new        Creates a Gigas Component System
+        update     Self updates to the latest release on Github
 
 ## Crates
 
