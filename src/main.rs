@@ -9,7 +9,7 @@ fn main() {
     // Command Line
 
     let matches = App::new("gigas-cli")
-        .version("0.1")
+        .version(cargo_crate_version!())
         .about("Check out github.com/alvivar/Gigas for more info!")
         .setting(ArgRequiredElseHelp)
         .subcommand(
