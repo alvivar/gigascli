@@ -1,7 +1,8 @@
 [package]
 name = "gigascli"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Andrés Villalobos <andresalvivar@gmail.com>"]
+repository = "https://github.com/alvivar/gigascli"
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,3 +10,4 @@ edition = "2018"
 [dependencies]
 clap = "2.33.3"
 walkdir = "2.3.1"
+self_update = "0.23.0"
