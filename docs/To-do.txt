@@ -1,12 +1,14 @@
 
+- Improve self update error messages
+- Make self update compatible with zip/compressed files
 - Analize should filter words
 - Generate state machine template
 - Option to avoid system generation or component generation
-
 - Generate the EntitySet
 
 
 2021.01.08
+x Self update!
 x Include the commented // component.enable = false on Start in the --alt generator as a hint
 x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
 x Avoid file generation on new, just print the thing in console
