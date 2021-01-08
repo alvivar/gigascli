@@ -1,4 +1,9 @@
 
+- Correct version on Clap
+
+- Test if "EntitySet.HapticFeedbacks" something like that is detected by
+analize.
+
 - Improve self update error messages
 - Make self update compatible with zip/compressed files
 - Analize should filter words
