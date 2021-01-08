@@ -3,7 +3,7 @@
 Command Line Interface for [Gigas](https://github.com/alvivar/Gigas), made in
 Rust.
 
-    gigas-cli 0.1
+    gigas-cli 0.1.2
     Check out github.com/alvivar/Gigas for more info!
 
     USAGE:
