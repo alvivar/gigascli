@@ -1,0 +1,23 @@
+
+- Analize should filter words
+- Generate state machine template
+- Include the commented // component.enable = false on Start in the --alt generator as a hint
+- Option to avoid system generation or component generation
+
+- Generate the EntitySet
+
+
+2021.01.08
+x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
+x Avoid file generation on new, just print the thing in console
+
+2020.12.06
+x File generation of the Templates
+x Generate the !alt base Component and System
+x Generate the base Component and System
+x Repo
+x Extract classes relationships
+
+2020.11.29
+x Read all .cs from a folder
+x Detect particular parameters to react
