@@ -236,12 +236,12 @@ fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<DirEntry> {
 }
 
 fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
-    let file = File::open(filename).expect("Couldn't open the file.");
+    let file = File::open(filename).expect("I can't open the file.");
     let buffer = BufReader::new(file);
 
     buffer
         .lines()
-        .map(|l| l.expect("Couldn't parse the line."))
+        .map(|l| l.expect("I can't parse the line."))
         .collect()
 }
 
@@ -254,9 +254,10 @@ fn lowercase_first(s: &str) -> String {
 }
 
 fn write_file(data: &str, filepath: impl AsRef<Path>) {
-    let f = File::create(filepath).expect("Unable to create file.");
+    let f = File::create(filepath).expect("I can't create the file.");
     let mut f = BufWriter::new(f);
-    f.write_all(data.as_bytes()).expect("Unable to write data.");
+    f.write_all(data.as_bytes())
+        .expect("I can't write to the file.");
 }
 
 fn generate_component_string(name: &str) -> String {
