@@ -191,7 +191,7 @@ fn main() {
 
         println!();
         println!("\t------ - --------- ------------");
-        println!("\tSystem / Component Relationship");
+        println!("\tSystem + Component Relationship");
         println!("\t------ - --------- ------------");
         for (key, value) in &relation_system_component {
             println!("\n\t{}", key);
@@ -202,7 +202,7 @@ fn main() {
 
         println!();
         println!("\t--------- - ------ ------------");
-        println!("\tComponent / System Relationship");
+        println!("\tComponent + System Relationship");
         println!("\t--------- - ------ ------------");
         for (key, value) in &relation_component_system {
             println!("\n\t{}", key);
