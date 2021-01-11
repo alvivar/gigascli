@@ -1,10 +1,10 @@
 
-- Correct version on Clap
+- Commented Tips should be optional.
 
 - Test if "EntitySet.HapticFeedbacks" something like that is detected by
 analize.
 
-- Improve self update error messages
+- Improve self update messages
 - Make self update compatible with zip/compressed files
 - Analize should filter words
 - Generate state machine template
@@ -13,6 +13,7 @@ analize.
 
 
 2021.01.08
+x Correct version on Clap
 x Self update!
 x Include the commented // component.enable = false on Start in the --alt generator as a hint
 x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
