@@ -305,7 +305,11 @@ public class @ComponentName : MonoBehaviour
     private void Start()
     {
         EntitySet.AddAlt@ComponentName(this);
-        // gameObject.SetActive(false);
+
+        // Tip: You can disable the current component or GameObject here. So it
+        // will be ignored by systems running his EntitySet (because of
+        // OnEnable/OnDisable up there) and you can use the Alt EntitySet to
+        // enable/disable when you want it.
     }
 
     private void OnDestroy()
