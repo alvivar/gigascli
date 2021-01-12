@@ -292,6 +292,16 @@ using UnityEngine;
 // !Gigas !Alt
 public class @ComponentName : MonoBehaviour
 {
+    private void Awake()
+    {
+        EntitySet.AddAlt@ComponentName(this);
+    }
+
+    private void OnDestroy()
+    {
+        EntitySet.RemoveAlt@ComponentName(this);
+    }
+
     private void OnEnable()
     {
         EntitySet.Add@ComponentName(this);
@@ -300,21 +310,6 @@ public class @ComponentName : MonoBehaviour
     private void OnDisable()
     {
         EntitySet.Remove@ComponentName(this);
-    }
-
-    private void Start()
-    {
-        EntitySet.AddAlt@ComponentName(this);
-
-        // Tip: You can disable the current component or GameObject here. So it
-        // will be ignored by systems running his EntitySet (because of
-        // OnEnable/OnDisable up there) and you can use the Alt EntitySet to
-        // enable/disable when you want it.
-    }
-
-    private void OnDestroy()
-    {
-        EntitySet.RemoveAlt@ComponentName(this);
     }
 }
 

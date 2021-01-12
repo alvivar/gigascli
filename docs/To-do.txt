@@ -1,18 +1,17 @@
 
-- Commented Tips should be optional.
-
 - Test if "EntitySet.HapticFeedbacks" something like that is detected by
 analize.
 
+- Analize should filter words
+- Generate the EntitySet
+- Generate state machine template?
+
 - Improve self update messages
 - Make self update compatible with zip/compressed files
-- Analize should filter words
-- Generate state machine template
-- Option to avoid system generation or component generation
-- Generate the EntitySet
 
 
 2021.01.08
+x Option to avoid system generation or component generation
 x Correct version on Clap
 x Self update!
 x Include the commented // component.enable = false on Start in the --alt generator as a hint
