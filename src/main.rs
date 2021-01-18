@@ -92,9 +92,17 @@ fn main() {
         }
 
         if has_output {
-            println!();
-            println!("[1] {} generated", component_file);
-            println!("[2] {} generated", system_file);
+            if !has_nocomp || !has_nosys {
+                println!();
+            }
+
+            if !has_nocomp {
+                println!("[1] {} generated", component_file);
+            }
+
+            if !has_nosys {
+                println!("[2] {} generated", system_file);
+            }
         }
 
         println!("\nDone!");

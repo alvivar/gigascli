@@ -9,6 +9,8 @@ analize.
 - Improve self update messages
 - Make self update compatible with zip/compressed files
 
+2021.01.17
+x Fix output results when you avoid printing something
 
 2021.01.08
 x Option to avoid system generation or component generation
