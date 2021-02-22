@@ -1,13 +1,17 @@
 use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
+use core::panic;
 use self_update::cargo_crate_version;
-use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::{collections::HashMap, fs::File};
-use std::{env, path::Path};
+use std::{
+    collections::HashMap,
+    env,
+    fs::File,
+    io::{BufRead, BufReader, BufWriter, Write},
+    path::Path,
+};
 use walkdir::{DirEntry, WalkDir};
 
 fn main() {
     // Command Line
-
     let matches = App::new("gigas-cli")
         .version(cargo_crate_version!())
         .about("Check out github.com/alvivar/Gigas for more info!")
@@ -48,7 +52,6 @@ fn main() {
         .get_matches();
 
     // Component and System templates
-
     if let Some(matches) = matches.subcommand_matches("new") {
         let component_name = matches.value_of("Name").unwrap();
         let has_output = matches.is_present("output");
@@ -56,7 +59,6 @@ fn main() {
         let has_nosys = matches.is_present("nosys");
 
         // Templates
-
         let component = match matches.is_present("alt") {
             true => generate_alt_component_string(component_name),
             false => generate_component_string(component_name),
@@ -65,7 +67,6 @@ fn main() {
         let system = generate_system_string(component_name);
 
         // Writing
-
         let component_file = format!("{}.cs", component_name);
         let system_file = format!("{}System.cs", component_name);
 
@@ -82,13 +83,12 @@ fn main() {
         }
 
         // Print
-
         if !has_nocomp {
-            println!("\n[1] Component\n\n{}", component);
+            println!("\n- Component\n\n{}", component);
         }
 
         if !has_nosys {
-            println!("\n[2] System\n\n{}", system);
+            println!("\n- System\n\n{}", system);
         }
 
         if has_output {
@@ -97,28 +97,25 @@ fn main() {
             }
 
             if !has_nocomp {
-                println!("[1] {} generated", component_file);
+                println!("- {} generated", component_file);
             }
 
             if !has_nosys {
-                println!("[2] {} generated", system_file);
+                println!("- {} generated", system_file);
             }
         }
 
         println!("\nDone!");
     }
 
-    // Code Analysis
-
+    // Code analysis
     if let Some(_matches) = matches.subcommand_matches("analize") {
         let current_dir = env::current_dir().unwrap();
 
         // All C# files
-
         let csharp_files = find_files(current_dir, ".cs");
 
         // Look and classify !gigas & !alt on files
-
         let mut gigas: Vec<DirEntry> = Vec::new();
         let mut gigas_alt: Vec<DirEntry> = Vec::new();
 
@@ -139,7 +136,6 @@ fn main() {
         }
 
         // Find relationships between classes
-
         let mut gigas_all: Vec<DirEntry> = Vec::new();
         gigas_all.extend(gigas);
         gigas_all.extend(gigas_alt);
@@ -162,8 +158,8 @@ fn main() {
                     }
 
                     let gigasnames: Vec<String> = vec![
-                        format!("{}s", class),
-                        format!("{}Ids", class),
+                        format!(".{}s", class),
+                        format!(".{}Ids", class),
                         format!("Get{}(", class),
                         format!("GetAlt{}(", class),
                     ];
@@ -171,7 +167,6 @@ fn main() {
                     for name in gigasnames {
                         if line.contains(&name) {
                             // System to Component
-
                             let components = relation_system_component
                                 .entry(system.to_string())
                                 .or_insert_with(Vec::new);
@@ -181,7 +176,6 @@ fn main() {
                             }
 
                             // Component to System
-
                             let systems = relation_component_system
                                 .entry(class.to_string())
                                 .or_insert_with(Vec::new);
@@ -196,7 +190,6 @@ fn main() {
         }
 
         // Relationships
-
         println!();
         println!("\t------ - --------- ------------");
         println!("\tSystem + Component Relationship");
@@ -223,10 +216,15 @@ fn main() {
     }
 
     // Self Update
-
     if let Some(_matches) = matches.subcommand_matches("update") {
         println!();
-        let _ = update();
+
+        match update() {
+            Ok(_) => {}
+            Err(_) => {
+                panic!("Error updating.")
+            }
+        }
     }
 }
 
@@ -235,6 +233,7 @@ fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<DirEntry> {
     for entry in WalkDir::new(filepath) {
         let entry = entry.expect("Couldn't walk the path.");
         let name = entry.file_name().to_string_lossy().to_lowercase();
+
         if name.ends_with(extension) {
             files.push(entry);
         }
