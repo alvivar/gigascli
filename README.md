@@ -21,5 +21,6 @@ Rust.
 
 ## Crates
 
-- Clap
-- Walkdir
+- clap
+- walkdir
+- self_update
