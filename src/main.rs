@@ -83,14 +83,6 @@ fn main() {
         }
 
         // Print
-        if !has_nocomp {
-            println!("\n- Component\n\n{}", component);
-        }
-
-        if !has_nosys {
-            println!("\n- System\n\n{}", system);
-        }
-
         if has_output {
             if !has_nocomp || !has_nosys {
                 println!();
