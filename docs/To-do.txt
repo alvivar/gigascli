@@ -1,32 +1,35 @@
 
-- Test if "EntitySet.HapticFeedbacks" something like that is detected by
-analize.
+    Analize should detect brothers as warnings
+    gigas update needs to update the Unity library
 
-- Analize should filter words
-- Generate the EntitySet
-- Generate state machine template?
+    Test if "EntitySet.HapticFeedbacks" something like gets detected by analize
 
-- Improve self update messages
-- Make self update compatible with zip/compressed files
+    Analize should filter words
+    Generate the EntitySet
+    Generate state machine template?
 
-2021.01.17
-x Fix output results when you avoid printing something
+    Improve self update messages
+    Make self update compatible with zip/compressed files
 
-2021.01.08
-x Option to avoid system generation or component generation
-x Correct version on Clap
-x Self update!
-x Include the commented // component.enable = false on Start in the --alt generator as a hint
-x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
-x Avoid file generation on new, just print the thing in console
 
-2020.12.06
-x File generation of the Templates
-x Generate the !alt base Component and System
-x Generate the base Component and System
-x Repo
-x Extract classes relationships
+    2021.01.17
+    x Fix output results when you avoid printing something
 
-2020.11.29
-x Read all .cs from a folder
-x Detect particular parameters to react
+    2021.01.08
+    x Option to avoid system generation or component generation
+    x Correct version on Clap
+    x Self update!
+    x Include the commented // component.enable = false on Start in the --alt generator as a hint
+    x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
+    x Avoid file generation on new, just print the thing in console
+
+    2020.12.06
+    x File generation of the Templates
+    x Generate the !alt base Component and System
+    x Generate the base Component and System
+    x Repo
+    x Extract classes relationships
+
+    2020.11.29
+    x Read all .cs from a folder
+    x Detect particular parameters to react
