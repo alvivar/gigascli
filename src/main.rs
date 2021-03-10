@@ -208,8 +208,9 @@ fn main() {
         // Relationships
         println!();
         println!("System + Component Relationship");
+
         for (key, value) in &system_component {
-            if filter.len() > 0 && !key.to_lowercase().contains(filter) {
+            if filter.len() > 0 && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
                 continue;
             }
 
@@ -223,8 +224,9 @@ fn main() {
         println!();
         println!("Component + System Relationship");
         println!();
+
         for (key, value) in &component_system {
-            if filter.len() > 0 && !key.to_lowercase().contains(filter) {
+            if filter.len() > 0 && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
                 continue;
             }
 
