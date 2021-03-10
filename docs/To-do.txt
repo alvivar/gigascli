@@ -1,16 +1,18 @@
 
     Analize should detect brothers as warnings
-    gigas update needs to update the Unity library
+    gigas update needs to update the Unity Gigas library
 
     Test if "EntitySet.HapticFeedbacks" something like gets detected by analize
 
-    Analize should filter words
     Generate the EntitySet
     Generate state machine template?
 
     Improve self update messages
     Make self update compatible with zip/compressed files
 
+
+    2021.03.09
+    x Analize should filter words
 
     2021.01.17
     x Fix output results when you avoid printing something

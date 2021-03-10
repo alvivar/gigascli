@@ -44,7 +44,14 @@ fn main() {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("analize").about("Analizes .cs files looking for relationships"),
+            SubCommand::with_name("analize")
+                .about("Analizes .cs files looking for relationships")
+                .arg(
+                    Arg::with_name("Filter")
+                        .help("Phrase to filter the results")
+                        .required(false)
+                        .index(1),
+                ),
         )
         .subcommand(
             SubCommand::with_name("update").about("Self updates to the latest release on Github"),
@@ -101,8 +108,13 @@ fn main() {
     }
 
     // Code analysis
-    if let Some(_matches) = matches.subcommand_matches("analize") {
+    if let Some(matches) = matches.subcommand_matches("analize") {
         let current_dir = env::current_dir().unwrap();
+
+        let filter = match matches.value_of("Filter") {
+            Some(name) => name,
+            None => "",
+        };
 
         // All C# files
         let csharp_files = find_files(current_dir, ".cs");
@@ -185,6 +197,10 @@ fn main() {
         println!();
         println!("System + Component Relationship");
         for (key, value) in &system_component {
+            if filter.len() > 0 && !key.to_lowercase().contains(filter) {
+                continue;
+            }
+
             println!("\n\t{}", key);
             for entry in value {
                 println!("\t\t{}", entry);
@@ -196,6 +212,10 @@ fn main() {
         println!("Component + System Relationship");
         println!();
         for (key, value) in &component_system {
+            if filter.len() > 0 && !key.to_lowercase().contains(filter) {
+                continue;
+            }
+
             println!("\n\t{}", key);
             for entry in value {
                 println!("\t\t{}", entry);
