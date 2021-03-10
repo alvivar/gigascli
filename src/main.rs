@@ -90,8 +90,17 @@ fn main() {
         }
 
         // Print
+        if !has_nocomp {
+            println!("\n\n{}", component);
+        }
+
+        if !has_nosys {
+            println!("\n\n{}", system);
+        }
+
         if has_output {
             if !has_nocomp || !has_nosys {
+                println!();
                 println!();
             }
 
@@ -104,6 +113,9 @@ fn main() {
             }
         }
 
+        if !has_output && (!has_nocomp || !has_nosys) {
+            println!();
+        }
         println!("\nDone!");
     }
 
