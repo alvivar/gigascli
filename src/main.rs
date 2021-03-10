@@ -137,8 +137,8 @@ fn main() {
             .map(|x| x.path().file_stem().unwrap().to_string_lossy().to_string())
             .collect();
 
-        let mut relation_system_component: HashMap<String, Vec<String>> = HashMap::new();
-        let mut relation_component_system: HashMap<String, Vec<String>> = HashMap::new();
+        let mut system_component: HashMap<String, Vec<String>> = HashMap::new();
+        let mut component_system: HashMap<String, Vec<String>> = HashMap::new();
 
         for file in &csharp_files {
             for line in lines_from_file(file.path()) {
@@ -150,16 +150,16 @@ fn main() {
                     }
 
                     let gigasnames: Vec<String> = vec![
-                        format!(".{}s", class),
-                        format!(".{}Ids", class),
-                        format!("Get{}(", class),
-                        format!("GetAlt{}(", class),
+                        format!("EntitySet.{}s", class),
+                        format!("EntitySet.{}Ids", class),
+                        format!("EntitySet.Get{}(", class),
+                        format!("EntitySet.GetAlt{}(", class),
                     ];
 
                     for name in gigasnames {
                         if line.contains(&name) {
                             // System to Component
-                            let components = relation_system_component
+                            let components = system_component
                                 .entry(system.to_string())
                                 .or_insert_with(Vec::new);
 
@@ -168,7 +168,7 @@ fn main() {
                             }
 
                             // Component to System
-                            let systems = relation_component_system
+                            let systems = component_system
                                 .entry(class.to_string())
                                 .or_insert_with(Vec::new);
 
@@ -183,10 +183,8 @@ fn main() {
 
         // Relationships
         println!();
-        println!("\t------ - --------- ------------");
-        println!("\tSystem + Component Relationship");
-        println!("\t------ - --------- ------------");
-        for (key, value) in &relation_system_component {
+        println!("System + Component Relationship");
+        for (key, value) in &system_component {
             println!("\n\t{}", key);
             for entry in value {
                 println!("\t\t{}", entry);
@@ -194,10 +192,10 @@ fn main() {
         }
 
         println!();
-        println!("\t--------- - ------ ------------");
-        println!("\tComponent + System Relationship");
-        println!("\t--------- - ------ ------------");
-        for (key, value) in &relation_component_system {
+        println!();
+        println!("Component + System Relationship");
+        println!();
+        for (key, value) in &component_system {
             println!("\n\t{}", key);
             for entry in value {
                 println!("\t\t{}", entry);
@@ -353,7 +351,7 @@ fn update() -> Result<(), Box<dyn std::error::Error>> {
         .build()?
         .update()?;
 
-    println!("Update status: v{}", status.version());
+    println!("Current version... v{}", status.version());
 
     Ok(())
 }
