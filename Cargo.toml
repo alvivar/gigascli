@@ -10,4 +10,4 @@ edition = "2018"
 [dependencies]
 clap = "2.33.3"
 walkdir = "2.3.1"
-self_update = "0.24.0"
+self_update = "0.26.0"
