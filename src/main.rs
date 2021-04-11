@@ -105,11 +105,11 @@ fn main() {
             }
 
             if !has_nocomp {
-                println!("- {} generated", component_file);
+                println!("{} generated", component_file);
             }
 
             if !has_nosys {
-                println!("- {} generated", system_file);
+                println!("{} generated", system_file);
             }
         }
 
