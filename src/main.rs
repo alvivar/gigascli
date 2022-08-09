@@ -1,13 +1,12 @@
-use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
 use core::panic;
 use self_update::cargo_crate_version;
-use std::{
-    collections::HashMap,
-    env,
-    fs::File,
-    io::{BufRead, BufReader, BufWriter, Write},
-    path::Path,
-};
+use std::collections::HashMap;
+use std::env;
+use std::fs::File;
+use std::io::{BufRead, BufReader, BufWriter, Write};
+use std::path::Path;
+
+use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
 use walkdir::{DirEntry, WalkDir};
 
 fn main() {
