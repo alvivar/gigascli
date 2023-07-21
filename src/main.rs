@@ -1,377 +1,188 @@
-use core::panic;
 use self_update::cargo_crate_version;
-use std::collections::HashMap;
-use std::env;
-use std::fs::File;
-use std::io::{BufRead, BufReader, BufWriter, Write};
-use std::path::Path;
-
-use clap::{App, AppSettings::ArgRequiredElseHelp, Arg, SubCommand};
-use walkdir::{DirEntry, WalkDir};
+use std::{
+    collections::HashMap,
+    env,
+    fs::File,
+    io::{self, BufRead, BufReader},
+    path::{Path, PathBuf},
+};
+use walkdir::WalkDir;
 
 fn main() {
-    // Command Line
-    let matches = App::new("gigas-cli")
-        .version(cargo_crate_version!())
-        .about("Check out github.com/alvivar/Gigas for more info!")
-        .setting(ArgRequiredElseHelp)
-        .subcommand(
-            SubCommand::with_name("new")
-                .setting(ArgRequiredElseHelp)
-                .about("Creates a Gigas Component System")
-                .arg(
-                    Arg::with_name("Name")
-                        .help("File name to be used as Component System")
-                        .required(true)
-                        .index(1),
-                )
-                .arg(
-                    Arg::with_name("alt")
-                        .long("alt")
-                        .help("Includes the !Alt API"),
-                )
-                .arg(Arg::with_name("output").short("o").help("Create the files"))
-                .arg(
-                    Arg::with_name("nocomp")
-                        .long("nocomp")
-                        .help("Ignore the Component"),
-                )
-                .arg(
-                    Arg::with_name("nosys")
-                        .long("nosys")
-                        .help("Ignore the System"),
-                ),
-        )
-        .subcommand(
-            SubCommand::with_name("analize")
-                .about("Analizes .cs files looking for relationships")
-                .arg(
-                    Arg::with_name("Filter")
-                        .help("Phrase to filter the results")
-                        .required(false)
-                        .index(1),
-                ),
-        )
-        .subcommand(
-            SubCommand::with_name("update").about("Self updates to the latest release on Github"),
-        )
-        .get_matches();
+    let current_dir = env::current_dir().unwrap();
 
-    // Component and System templates
-    if let Some(matches) = matches.subcommand_matches("new") {
-        let component_name = matches.value_of("Name").unwrap();
-        let has_output = matches.is_present("output");
-        let has_nocomp = matches.is_present("nocomp");
-        let has_nosys = matches.is_present("nosys");
+    let usage_text = "
+  Usage: gigascli.exe [command] [filter]
 
-        // Templates
-        let component = match matches.is_present("alt") {
-            true => generate_alt_component_string(component_name),
-            false => generate_component_string(component_name),
-        };
+  Options:
+    -h, --help        \tShow this help message
 
-        let system = generate_system_string(component_name);
+  Commands:
+    - analyze [filter]\tScans *.cs files with !Gigas tags and prints relationships between classes
+    - update          \tUpdates this tool to the latest version";
 
-        // Writing
-        let component_file = format!("{}.cs", component_name);
-        let system_file = format!("{}System.cs", component_name);
+    let args = env::args().collect::<Vec<String>>();
 
-        if has_output {
-            let current_dir = env::current_dir().unwrap();
-
-            if !has_nocomp {
-                write_file(component.as_str(), current_dir.join(&component_file));
-            }
-
-            if !has_nosys {
-                write_file(system.as_str(), current_dir.join(&system_file));
-            }
-        }
-
-        // Print
-        if !has_nocomp {
-            println!("\n\n{}", component);
-        }
-
-        if !has_nosys {
-            println!("\n\n{}", system);
-        }
-
-        if has_output {
-            if !has_nocomp || !has_nosys {
-                println!();
-                println!();
-            }
-
-            if !has_nocomp {
-                println!("{} generated", component_file);
-            }
-
-            if !has_nosys {
-                println!("{} generated", system_file);
-            }
-        }
-
-        if !has_output && (!has_nocomp || !has_nosys) {
-            println!();
-        }
-        println!("\nDone!");
+    if args.len() < 2 {
+        println!("{}", usage_text);
+        return;
     }
 
-    // Code analysis
-    if let Some(matches) = matches.subcommand_matches("analize") {
-        let current_dir = env::current_dir().unwrap();
+    let command = if args.len() > 1 { args[1].as_str() } else { "" };
+    let filter = if args.len() > 2 { args[2].as_str() } else { "" };
 
-        let filter = match matches.value_of("Filter") {
-            Some(name) => name,
-            None => "",
-        };
-
-        // All C# files
-        let csharp_files = find_files(current_dir, ".cs");
-
-        // Look and classify !gigas & !alt on files
-        let mut gigas: Vec<DirEntry> = Vec::new();
-        let mut gigas_alt: Vec<DirEntry> = Vec::new();
-
-        for entry in &csharp_files {
-            for line in lines_from_file(entry.path()) {
-                let lowercase_line = line.to_lowercase();
-
-                if lowercase_line.contains("!gigas") {
-                    if lowercase_line.contains("!alt") {
-                        gigas_alt.push(entry.clone());
-                    } else {
-                        gigas.push(entry.clone());
-                    }
-
-                    break;
-                }
-            }
+    match command {
+        "-h" | "--help" => {
+            println!("{}", usage_text);
+            return;
         }
 
-        // Find relationships between classes
-        let mut gigas_all: Vec<DirEntry> = Vec::new();
-        gigas_all.extend(gigas);
-        gigas_all.extend(gigas_alt);
+        "analyze" => {}
 
-        let gigas_components: Vec<String> = gigas_all
-            .iter()
-            .map(|x| x.path().file_stem().unwrap().to_string_lossy().to_string())
-            .collect();
+        "update" => {
+            println!();
+            update().unwrap();
+            return;
+        }
 
-        let mut system_component: HashMap<String, Vec<String>> = HashMap::new();
-        let mut component_system: HashMap<String, Vec<String>> = HashMap::new();
+        _ => {
+            if !command.is_empty() {
+                println!("\n  Unknown command: {}", command);
+                println!("{}", usage_text);
+                return;
+            }
+        }
+    }
 
-        for file in &csharp_files {
-            for line in lines_from_file(file.path()) {
-                for class in &gigas_components {
-                    let system = file.path().file_stem().unwrap().to_str().unwrap();
+    let (system_component, component_system) = scan_gigas_files(current_dir);
+    print_scan(system_component, component_system, filter);
 
-                    if system == "Femto" || system == "EntitySet" {
-                        continue;
-                    }
+    println!("\n\n  Done!");
+}
 
-                    let gigasnames: Vec<String> = vec![
-                        format!("EntitySet.{}s", class),
-                        format!("EntitySet.{}Ids", class),
-                        format!("EntitySet.Get{}(", class),
-                        format!("EntitySet.GetAlt{}(", class),
-                    ];
+fn scan_gigas_files(path: PathBuf) -> (HashMap<String, Vec<String>>, HashMap<String, Vec<String>>) {
+    let csharp_files: Vec<PathBuf> = find_files(path, ".cs");
 
-                    for name in gigasnames {
-                        if line.contains(&name) {
-                            // System to Component
-                            let components = system_component
-                                .entry(system.to_string())
-                                .or_insert_with(Vec::new);
+    // Look for !Gigas files
+    let mut gigas: Vec<PathBuf> = Vec::new();
 
-                            if !components.contains(&class.to_string()) {
-                                components.push(class.to_string());
-                            }
+    for entry in &csharp_files {
+        for line in lines_from_file(entry).unwrap() {
+            if line.to_lowercase().contains("!gigas") {
+                gigas.push(entry.clone());
+                break;
+            }
+        }
+    }
 
-                            // Component to System
-                            let systems = component_system
-                                .entry(class.to_string())
-                                .or_insert_with(Vec::new);
+    // Find relationships between classes
+    let classes: Vec<String> = gigas
+        .iter()
+        .map(|x| x.file_stem().unwrap().to_string_lossy().to_string())
+        .collect();
 
-                            if !systems.contains(&system.to_string()) {
-                                systems.push(system.to_string());
-                            }
+    let mut system_component: HashMap<String, Vec<String>> = HashMap::new();
+    let mut component_system: HashMap<String, Vec<String>> = HashMap::new();
+
+    for file in &csharp_files {
+        for line in lines_from_file(file).unwrap() {
+            for class in &classes {
+                let system = file.file_stem().unwrap().to_str().unwrap();
+
+                if system == "Femto" || system == "EntitySet" {
+                    continue;
+                }
+
+                let names: Vec<String> = vec![
+                    format!("EntitySet.{}Id", class),
+                    format!("EntitySet.Get{}(", class),
+                    format!("EntitySet.GetAll{}(", class),
+                ];
+
+                for name in names {
+                    if line.contains(&name) {
+                        // System to Component
+                        let components = system_component
+                            .entry(system.to_string())
+                            .or_insert_with(Vec::new);
+
+                        if !components.contains(&class.to_string()) {
+                            components.push(class.to_string());
+                        }
+
+                        // Component to System
+                        let systems = component_system
+                            .entry(class.to_string())
+                            .or_insert_with(Vec::new);
+
+                        if !systems.contains(&system.to_string()) {
+                            systems.push(system.to_string());
                         }
                     }
                 }
             }
         }
-
-        // Relationships
-        println!();
-        println!("System + Component Relationship");
-
-        for (key, value) in &system_component {
-            if filter.len() > 0 && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
-                continue;
-            }
-
-            println!("\n\t{}", key);
-            for entry in value {
-                println!("\t\t{}", entry);
-            }
-        }
-
-        println!();
-        println!();
-        println!("Component + System Relationship");
-        println!();
-
-        for (key, value) in &component_system {
-            if filter.len() > 0 && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
-                continue;
-            }
-
-            println!("\n\t{}", key);
-            for entry in value {
-                println!("\t\t{}", entry);
-            }
-        }
-
-        println!("\nDone!");
     }
 
-    // Self Update
-    if let Some(_matches) = matches.subcommand_matches("update") {
-        println!();
+    (system_component, component_system)
+}
 
-        match update() {
-            Ok(_) => {}
-            Err(_) => {
-                panic!("Error updating.")
-            }
+fn print_scan(
+    system_component: HashMap<String, Vec<String>>,
+    component_system: HashMap<String, Vec<String>>,
+    filter: &str,
+) {
+    // Relationships
+    println!();
+    println!("  System/Component Relationship");
+
+    for (key, value) in &system_component {
+        if !filter.is_empty() && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
+            continue;
+        }
+
+        println!("\n    {}", key);
+        for entry in value {
+            println!("      - {}", entry);
+        }
+    }
+
+    println!();
+    println!();
+    println!("  Component/System Relationship");
+
+    for (key, value) in &component_system {
+        if !filter.is_empty() && !key.to_lowercase().contains(filter.to_lowercase().as_str()) {
+            continue;
+        }
+
+        println!("\n    {}", key);
+        for entry in value {
+            println!("      - {}", entry);
         }
     }
 }
 
-fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<DirEntry> {
-    let mut files: Vec<DirEntry> = Vec::new();
-    for entry in WalkDir::new(filepath) {
-        let entry = entry.expect("Couldn't walk the path.");
-        let name = entry.file_name().to_string_lossy().to_lowercase();
+fn find_files(filepath: impl AsRef<Path>, extension: &str) -> Vec<PathBuf> {
+    let mut files: Vec<PathBuf> = Vec::new();
 
-        if name.ends_with(extension) {
-            files.push(entry);
+    for entry in WalkDir::new(filepath) {
+        let entry = entry.unwrap();
+        let name = entry.file_name().to_string_lossy();
+
+        if name.to_lowercase().ends_with(extension) {
+            files.push(entry.into_path());
         }
     }
 
     files
 }
 
-fn lines_from_file(filename: impl AsRef<Path>) -> Vec<String> {
-    let file = File::open(filename).expect("I can't open the file.");
+fn lines_from_file(filename: impl AsRef<Path>) -> io::Result<Vec<String>> {
+    let file = File::open(filename).unwrap();
     let buffer = BufReader::new(file);
 
-    buffer
-        .lines()
-        .map(|l| l.expect("I can't parse the line."))
-        .collect()
-}
-
-fn lowercase_first(s: &str) -> String {
-    let mut c = s.chars();
-    match c.next() {
-        None => String::new(),
-        Some(f) => f.to_lowercase().collect::<String>() + c.as_str(),
-    }
-}
-
-fn write_file(data: &str, filepath: impl AsRef<Path>) {
-    let f = File::create(filepath).expect("I can't create the file.");
-    let mut f = BufWriter::new(f);
-    f.write_all(data.as_bytes())
-        .expect("I can't write to the file.");
-}
-
-fn generate_component_string(name: &str) -> String {
-    let template = r#"
-
-using UnityEngine;
-
-// !Gigas
-public class @ComponentName : MonoBehaviour
-{
-    private void OnEnable()
-    {
-        EntitySet.Add@ComponentName(this);
-    }
-
-    private void OnDisable()
-    {
-        EntitySet.Remove@ComponentName(this);
-    }
-}
-
-"#;
-
-    template.replace("@ComponentName", name).trim().to_string()
-}
-
-fn generate_alt_component_string(name: &str) -> String {
-    let template = r#"
-
-using UnityEngine;
-
-// !Gigas !Alt
-public class @ComponentName : MonoBehaviour
-{
-    private void Awake()
-    {
-        EntitySet.AddAlt@ComponentName(this);
-    }
-
-    private void OnDestroy()
-    {
-        EntitySet.RemoveAlt@ComponentName(this);
-    }
-
-    private void OnEnable()
-    {
-        EntitySet.Add@ComponentName(this);
-    }
-
-    private void OnDisable()
-    {
-        EntitySet.Remove@ComponentName(this);
-    }
-}
-
-"#;
-
-    template.replace("@ComponentName", name).trim().to_string()
-}
-
-fn generate_system_string(name: &str) -> String {
-    let template = r#"
-
-using UnityEngine;
-
-public class @ComponentSystem : MonoBehaviour
-{
-    void Update()
-    {
-        var @components = EntitySet.@Components;
-        for (int i = 0; i < @components.Length; i++)
-        {
-            var @component = @components.Elements[i];
-        }
-    }
-}
-
-"#;
-
-    template
-        .replace("@Component", name)
-        .replace("@component", lowercase_first(name).as_str())
-        .trim()
-        .to_string()
+    buffer.lines().collect()
 }
 
 fn update() -> Result<(), Box<dyn std::error::Error>> {
