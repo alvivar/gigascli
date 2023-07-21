@@ -132,7 +132,6 @@ fn print_scan(
     component_system: HashMap<String, Vec<String>>,
     filter: &str,
 ) {
-    // Relationships
     println!();
     println!("  System/Component Relationship");
 
