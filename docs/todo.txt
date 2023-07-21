@@ -1,23 +1,27 @@
 
-    Analize should detect brothers as warnings
-    gigas update needs to update the Unity Gigas library
+Analyze should detect brothers as warnings
+gigas update needs to update the Unity Gigas library
 
-    Test if "EntitySet.HapticFeedbacks" something like gets detected by analize
+Test if "EntitySet.HapticFeedbacks" something like gets detected by analyze
 
-    Generate the EntitySet
-    Generate state machine template?
+Generate the EntitySet
+Generate state machine template?
 
-    Improve self update messages
-    Make self update compatible with zip/compressed files
+Improve self update messages
+Make self update compatible with zip/compressed files
 
 
-    2021.03.09
-    x Analize should filter words
+21 Julio, 2023
+    x Refactor to remove clap
+    x Small optimizations
 
-    2021.01.17
+2021.03.09
+    x Analyze should filter words
+
+2021.01.17
     x Fix output results when you avoid printing something
 
-    2021.01.08
+2021.01.08
     x Option to avoid system generation or component generation
     x Correct version on Clap
     x Self update!
@@ -25,13 +29,13 @@
     x Improve word detection with RE, because of looking for Dash or DashToPlayer create problems
     x Avoid file generation on new, just print the thing in console
 
-    2020.12.06
+2020.12.06
     x File generation of the Templates
     x Generate the !alt base Component and System
     x Generate the base Component and System
     x Repo
     x Extract classes relationships
 
-    2020.11.29
+2020.11.29
     x Read all .cs from a folder
     x Detect particular parameters to react
