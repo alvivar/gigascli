@@ -1,26 +1,14 @@
 # Gigas CLI
 
-Command Line Interface for [Gigas](https://github.com/alvivar/Gigas), made in
-Rust.
+Command Line Interface for [Gigas](https://github.com/alvivar/Gigas).
 
-    gigas-cli
-    Check out github.com/alvivar/Gigas for more info!
+```
+  Usage: gigascli.exe [command] [filter]
 
-    USAGE:
-        gigascli.exe [SUBCOMMAND]
+  Options:
+    -h, --help          Show this help message
 
-    FLAGS:
-        -h, --help       Prints help information
-        -V, --version    Prints version information
-
-    SUBCOMMANDS:
-        analize    Analizes .cs files looking for relationships
-        help       Prints this message or the help of the given subcommand(s)
-        new        Creates a Gigas Component System
-        update     Self updates to the latest release on Github
-
-## Crates
-
-- clap
-- walkdir
-- self_update
+  Commands:
+    - analyze [filter]  Scans *.cs files with !Gigas tags and prints relationships between classes
+    - update            Updates this tool to the latest version
+```
